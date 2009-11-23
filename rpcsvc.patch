@@ -1,0 +1,134 @@
+diff -ur cc/Makefile rpcsvc/Makefile
+--- cc/Makefile	2009-11-23 15:23:39.772178600 +0100
++++ rpcsvc/Makefile	2009-11-23 15:36:29.490928600 +0100
+@@ -7,7 +7,7 @@
+ #    /lib /bin /include
+ #
+ DESTDIR=
+-CFLAGS=" -g -O2 -I.. -L../rpc -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/"
++CFLAGS=" -g -O2 -I.. -L../rpc -I/lib/gcc/i686-pc-cygwin/4.3.2/include/"
+ MAKE=make
+ EXT=.exe
+ 
+diff -ur cc/etc/Makefile rpcsvc/etc/Makefile
+--- cc/etc/Makefile	2009-11-23 16:53:41.569053600 +0100
++++ rpcsvc/etc/Makefile	2009-11-23 16:32:35.115928600 +0100
+@@ -4,7 +4,7 @@
+ #   Files and programs for /etc.  rpclib must have already been installed.
+ #
+ DESTDIR=
+-CFLAGS= -g -O2
++CFLAGS= -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
+ LIB = -lrpclib -lnetapi32
+ LDFLAGS= $(LIB)
+ BIN = portmap rpcinfo
+diff -ur cc/rpcgen/Makefile rpcsvc/rpcgen/Makefile
+--- cc/rpcgen/Makefile	2009-11-23 15:26:21.787803600 +0100
++++ rpcsvc/rpcgen/Makefile	2009-11-23 15:36:29.600303600 +0100
+@@ -12,7 +12,7 @@
+ 
+ EXT = .exe
+ GOAL=rpcgen$(EXT)
+-CFLAGS = -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
++CFLAGS = -I/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
+ DESTDIR=
+ 
+ $(GOAL): $(OBJS)
+diff -ur cc/rpcsvc/Makefile rpcsvc/rpcsvc/Makefile
+--- cc/rpcsvc/Makefile	2009-11-23 15:26:42.850303600 +0100
++++ rpcsvc/rpcsvc/Makefile	2009-11-23 16:05:44.256553600 +0100
+@@ -2,52 +2,48 @@
+ # @(#)Makefile	2.3 88/08/11 4.0 RPCSRC
+ #
+ #
+-RPCCOM = $(DESTDIR)/bin/rpcgen
++RPCCOM = ${DESTDIR}/bin/rpcgen
+ LIB = -lrpclib
+ 
+ DESTDIR=
+-CFLAGS= -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/  -g -O2
++CFLAGS=-I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/  -g -O2
+ LDFLAGS=
+ 
+-HDRS= key_prot.h klm_prot.h mount.h nfs_prot.h nlm_prot.h rex.h rquota.h rusers.h\
++HDRS= klm_prot.h mount.h nfs_prot.h nlm_prot.h rex.h rquota.h rnusers.h\
+       rquota.h rstat.h sm_inter.h spray.h yppasswd.h yp.h
+-XFILES= bootparam_prot.x key_prot.x klm_prot.x mount.x nfs_prot.x nlm_prot.x \
+-      rex.x rusers.x rquota.x rstat.x sm_inter.x spray.x yppasswd.x yp.x
+-EXT=.exe
+-BIN= rstat${EXT}
+-#SVCBIN= rstat_svc${EXT}
+-SVCBIN=
++XFILES= bootparam_prot.x klm_prot.x mount.x nfs_prot.x nlm_prot.x \
++      rex.x rnusers.x rquota.x rstat.x sm_inter.x spray.x yppasswd.x yp.x
++BIN= rstat
++SVCBIN= rstat_svc
+ GEN= rstat_clnt.c rstat_svc.c rstat_xdr.c
+ 
+-all:	$(HDRS) $(BIN) $(SVCBIN)
++all:	$(HDRS) $(BIN) 
+ 
+ install: $(HDRS) $(XFILES)
+ 	@echo "Creating RPC service headers directory"
+-	-mkdir -p ${DESTDIR}/include/rpcsvc && \
++	-mkdir ${DESTDIR}/include/rpcsvc && \
++		chown bin ${DESTDIR}/include/rpcsvc && \
+ 		chmod 755 ${DESTDIR}/include/rpcsvc
+ 	@echo "Installing RPC service header and definition files"
+ 	for i in $(HDRS) $(XFILES); do \
+ 		(install -c -m 644 $$i ${DESTDIR}/include/rpcsvc) done
+-	-mkdir -p ${DESTDIR}/etc && \
++	-mkdir ${DESTDIR}/etc && chown bin ${DESTDIR}/etc && \
+ 		chmod 755 ${DESTDIR}/etc
+-	@if [ "${SVCBIN}" != "" ]; then \
+-		echo "Installing ${SVCBIN} in ${DESTDIR}/etc"; \
+-		install -c -s ${SVCBIN} ${DESTDIR}/sbin/${SVCBIN}; \
+-	fi;
++#	@echo "Installing ${SVCBIN} in ${DESTDIR}/etc"
++#	@set -x;for i in ${SVCBIN}; do \
++#		(install -c -s $$i ${DESTDIR}/etc/$$i); done
+ 	@echo "Installing ${BIN} in ${DESTDIR}/bin"
+-	@mkdir -p ${DESTDIR}/bin
+-	install -c -s ${BIN} ${DESTDIR}/bin/${BIN}
++	@set -x;for i in ${BIN}; do \
++		(install -c -s $$i ${DESTDIR}/bin/$$i); done
+ 
+-${SVCBIN}: rstat_proc.o rstat_svc.o rstat_xdr.o
++rstat_svc: rstat_proc.o rstat_svc.o rstat_xdr.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rstat_proc.o rstat_svc.o rstat_xdr.o $(LIB)
+ 
+-${BIN}: rstat.o rstat_clnt.o rstat_xdr.o
++rstat: rstat.o rstat_clnt.o rstat_xdr.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rstat.o rstat_clnt.o rstat_xdr.o $(LIB)
+ 
+ rstat.c rstat_proc.c:	rstat.h
+ 
+-key_prot.h:	key_prot.x
+-	$(RPCCOM) -h key_prot.x -o $@
+ klm_prot.h:	klm_prot.x
+ 	$(RPCCOM) -h klm_prot.x -o $@
+ mount.h:	mount.x
+@@ -58,8 +54,8 @@
+ 	$(RPCCOM) -h nlm_prot.x -o $@
+ rex.h:	rex.x
+ 	$(RPCCOM) -h rex.x -o $@
+-rusers.h:	rusers.x
+-	$(RPCCOM) -h rusers.x -o $@
++rnusers.h:	rnusers.x
++	$(RPCCOM) -h rnusers.x -o $@
+ rquota.h:	rquota.x
+ 	$(RPCCOM) -h rquota.x -o $@
+ rstat.h:	rstat.x
+diff -ur cc/rpcsvc/rstat_proc.c rpcsvc/rpcsvc/rstat_proc.c
+--- cc/rpcsvc/rstat_proc.c	2009-11-23 15:10:21.569053600 +0100
++++ rpcsvc/rpcsvc/rstat_proc.c	2009-11-23 16:01:48.022178600 +0100
+@@ -44,7 +44,9 @@
+ #include <stdio.h>
+ #include <rpc/rpc.h>
+ #include <sys/socket.h>
++#if ! defined(__CYGWIN__)
+ #include <nlist.h>
++#endif
+ #include <sys/dk.h>
+ #include <sys/errno.h>
+ #include <sys/vmmeter.h>

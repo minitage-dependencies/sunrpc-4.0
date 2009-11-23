@@ -1,0 +1,60 @@
+diff -ur dll/Makefile cc/Makefile
+--- dll/Makefile	2009-11-23 15:06:01.490928600 +0100
++++ cc/Makefile	2009-11-23 15:23:39.772178600 +0100
+@@ -7,7 +7,7 @@
+ #    /lib /bin /include
+ #
+ DESTDIR=
+-CFLAGS='-g -O2 -I.. -L../rpc'
++CFLAGS=" -g -O2 -I.. -L../rpc -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/"
+ MAKE=make
+ EXT=.exe
+ 
+diff -ur dll/rpc/Makefile cc/rpc/Makefile
+--- dll/rpc/Makefile	2009-11-23 16:47:44.006553600 +0100
++++ cc/rpc/Makefile	2009-11-23 16:56:54.365928600 +0100
+@@ -7,7 +7,7 @@
+ DESTDIR=
+ 
+ CPPFLAGS = -I..
+-CFLAGS = -g -O2 -I..
++CFLAGS = -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/  -g -O2 -I..
+ 
+ SRCS = auth_none.c auth_unix.c  authunix_prot.c bindresvport.c \
+ 	clnt_generic.c clnt_perror.c clnt_raw.c clnt_simple.c clnt_tcp.c \
+diff -ur dll/rpcgen/Makefile cc/rpcgen/Makefile
+--- dll/rpcgen/Makefile	2009-11-23 15:06:01.537803600 +0100
++++ cc/rpcgen/Makefile	2009-11-23 15:26:21.787803600 +0100
+@@ -12,7 +12,7 @@
+ 
+ EXT = .exe
+ GOAL=rpcgen$(EXT)
+-CFLAGS = -g -O2
++CFLAGS = -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
+ DESTDIR=
+ 
+ $(GOAL): $(OBJS)
+diff -ur dll/rpcsvc/Makefile cc/rpcsvc/Makefile
+--- dll/rpcsvc/Makefile	2009-11-23 15:06:01.537803600 +0100
++++ cc/rpcsvc/Makefile	2009-11-23 15:26:42.850303600 +0100
+@@ -6,7 +6,7 @@
+ LIB = -lrpclib
+ 
+ DESTDIR=
+-CFLAGS= -g -O2
++CFLAGS= -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/  -g -O2
+ LDFLAGS=
+ 
+ HDRS= key_prot.h klm_prot.h mount.h nfs_prot.h nlm_prot.h rex.h rquota.h rusers.h\
+diff -ur dll/secure_rpc/bin/Makefile cc/secure_rpc/bin/Makefile
+--- dll/secure_rpc/bin/Makefile	2009-11-23 15:06:01.553428600 +0100
++++ cc/secure_rpc/bin/Makefile	2009-11-23 15:10:35.725303600 +0100
+@@ -28,7 +28,7 @@
+ 
+ depend:
+ 	for i in ${NSTD}; do \
+-	    cc -M ${INCPATH} $$i.c | sed 's/\.o//' | \
++	    gcc -M ${INCPATH} $$i.c | sed 's/\.o//' | \
+ 	    awk ' { if ($$1 != prev) \
+ 		{ if (rec != "") print rec; rec = $$0; prev = $$1; } \
+ 		else { if (length(rec $$2) > 78) { print rec; rec = $$0; } \

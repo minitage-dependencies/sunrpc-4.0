@@ -1,0 +1,201 @@
+diff -ur newgcc/Makefile destdir/Makefile
+--- newgcc/Makefile	2009-11-23 15:01:16.364981500 +0100
++++ destdir/Makefile	2009-11-23 15:03:40.350278000 +0100
+@@ -4,7 +4,7 @@
+ #   Build and install everything.
+ #
+ # These directories are presumed to exist in DESTDIR:
+-#    /usr/lib /usr/bin /usr/include
++#    /lib /bin /include
+ #
+ DESTDIR=
+ CFLAGS='-g -O2 -I.. -L../rpc'
+diff -ur newgcc/etc/Makefile destdir/etc/Makefile
+--- newgcc/etc/Makefile	2009-11-23 15:01:16.380606600 +0100
++++ destdir/etc/Makefile	2009-11-23 15:03:40.287777600 +0100
+@@ -20,10 +20,10 @@
+ 	${CC} ${CFLAGS} -o $@ $@.c ${LDFLAGS}
+ 
+ install: ${BIN}
+-	@echo "Installing RPC utility files in ${DESTDIR}/usr/sbin"
+-	@mkdir -p ${DESTDIR}/usr/sbin
++	@echo "Installing RPC utility files in ${DESTDIR}/sbin"
++	@mkdir -p ${DESTDIR}/sbin
+ 	@set -x;for i in ${BIN}; do \
+-		(install -s $$i ${DESTDIR}/usr/sbin/$$i); done
++		(install -s $$i ${DESTDIR}/sbin/$$i); done
+ 	@echo "Installing ${DESTDIR}/etc/rpc"
+ 	@mkdir -p $(DESTDIR)/etc
+ 	@set -x;for i in ${MISC}; do \
+@@ -57,7 +57,7 @@
+ 	cp /dev/null x.c
+ 	for i in $(BIN) ; do \
+               (/bin/grep '^#[         ]*include' x.c $$i.c | sed \
+-                      -e 's,<\(.*\)>,"/usr/include/\1",' \
++                      -e 's,<\(.*\)>,"/include/\1",' \
+                       -e 's/:[^"]*"\([^"]*\)".*/: \1/' \
+ 	                  -e 's/\.c/\.o/' >>makedep); done
+ 	echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
+diff -ur newgcc/rpc/Makefile destdir/rpc/Makefile
+--- newgcc/rpc/Makefile	2009-11-23 15:01:16.380606600 +0100
++++ destdir/rpc/Makefile	2009-11-23 15:03:40.412778400 +0100
+@@ -38,18 +38,18 @@
+ 
+ install: $(HDRS) librpclib.a
+ 	@echo "Creating RPC header directory"
+-	-mkdir -p ${DESTDIR}/usr/include/rpc && \
+-		chmod 755 ${DESTDIR}/usr/include/rpc
++	-mkdir -p ${DESTDIR}/include/rpc && \
++		chmod 755 ${DESTDIR}/include/rpc
+ 	@echo "Installing RPC header files"
+ 	-set -x;for i in $(HDRS) ; do \
+-		(install -c -m 644 $$i ${DESTDIR}/usr/include/rpc) done
++		(install -c -m 644 $$i ${DESTDIR}/include/rpc) done
+ 	@echo "Installing RPC library"
+-	@if [ -f ${DESTDIR}/usr/lib/librpclib.a ]; then rm -f ${DESTDIR}/usr/lib/librpclib.a; fi;
+-	@mkdir -p ${DESTDIR}/usr/lib
+-	install -c -m 644 librpclib.a ${DESTDIR}/usr/lib
+-	ranlib ${DESTDIR}/usr/lib/librpclib.a
+-	@if [ -L ${DESTDIR}/usr/lib/librpc.a ]; then rm -f ${DESTDIR}/usr/lib/librpc.a; fi;
+-	ln -s ./librpclib.a ${DESTDIR}/usr/lib/librpc.a
++	@if [ -f ${DESTDIR}/lib/librpclib.a ]; then rm -f ${DESTDIR}/lib/librpclib.a; fi;
++	@mkdir -p ${DESTDIR}/lib
++	install -c -m 644 librpclib.a ${DESTDIR}/lib
++	ranlib ${DESTDIR}/lib/librpclib.a
++	@if [ -L ${DESTDIR}/lib/librpc.a ]; then rm -f ${DESTDIR}/lib/librpc.a; fi;
++	ln -s ./librpclib.a ${DESTDIR}/lib/librpc.a
+ 
+ tags: $(SRCS) $(HDRS)
+ 	ctags -tw $(SRCS) $(HDRS)
+@@ -88,7 +88,7 @@
+               (/bin/grep '^#[         ]*include' x.c $$i | sed \
+                       -e '/\.\.\/h/d' \
+                       -e '/\.\.\/ufs/d' \
+-                      -e 's,<\(.*\)>,"/usr/include/\1",' \
++                      -e 's,<\(.*\)>,"/include/\1",' \
+                       -e 's/:[^"]*"\([^"]*\)".*/: \1/' \
+ 	                  -e 's/\.c/\.o/' >>makedep); done
+ 	echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
+diff -ur newgcc/rpcgen/Makefile destdir/rpcgen/Makefile
+--- newgcc/rpcgen/Makefile	2009-11-23 15:01:16.411856800 +0100
++++ destdir/rpcgen/Makefile	2009-11-23 15:03:40.459653700 +0100
+@@ -20,8 +20,8 @@
+ 
+ install: $(GOAL)
+ 	@echo "Installing the RPC Protocol Compiler"
+-	@mkdir -p $(DESTDIR)/usr/bin
+-	install -s $(GOAL) $(DESTDIR)/usr/bin
++	@mkdir -p $(DESTDIR)/bin
++	install -s $(GOAL) $(DESTDIR)/bin
+ 
+ lint: $(SRCS) $(HDRS)
+ 	lint $(SRCS)
+@@ -44,7 +44,7 @@
+               (/bin/grep '^#[         ]*include' x.c $$i | sed \
+                       -e '/\.\.\/h/d' \
+                       -e '/\.\.\/ufs/d' \
+-                      -e 's,<\(.*\)>,"/usr/include/\1",' \
++                      -e 's,<\(.*\)>,"/include/\1",' \
+                       -e 's/:[^"]*"\([^"]*\)".*/: \1/' \
+ 	                  -e 's/\.c/\.o/' >>makedep); done
+ 	echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep
+diff -ur newgcc/rpcsvc/Makefile destdir/rpcsvc/Makefile
+--- newgcc/rpcsvc/Makefile	2009-11-23 15:01:16.427481900 +0100
++++ destdir/rpcsvc/Makefile	2009-11-23 15:03:40.522154100 +0100
+@@ -2,7 +2,7 @@
+ # @(#)Makefile	2.3 88/08/11 4.0 RPCSRC
+ #
+ #
+-RPCCOM = $(DESTDIR)/usr/bin/rpcgen
++RPCCOM = $(DESTDIR)/bin/rpcgen
+ LIB = -lrpclib
+ 
+ DESTDIR=
+@@ -23,20 +23,20 @@
+ 
+ install: $(HDRS) $(XFILES)
+ 	@echo "Creating RPC service headers directory"
+-	-mkdir -p ${DESTDIR}/usr/include/rpcsvc && \
+-		chmod 755 ${DESTDIR}/usr/include/rpcsvc
++	-mkdir -p ${DESTDIR}/include/rpcsvc && \
++		chmod 755 ${DESTDIR}/include/rpcsvc
+ 	@echo "Installing RPC service header and definition files"
+ 	for i in $(HDRS) $(XFILES); do \
+-		(install -c -m 644 $$i ${DESTDIR}/usr/include/rpcsvc) done
++		(install -c -m 644 $$i ${DESTDIR}/include/rpcsvc) done
+ 	-mkdir -p ${DESTDIR}/etc && \
+ 		chmod 755 ${DESTDIR}/etc
+ 	@if [ "${SVCBIN}" != "" ]; then \
+ 		echo "Installing ${SVCBIN} in ${DESTDIR}/etc"; \
+-		install -c -s ${SVCBIN} ${DESTDIR}/usr/sbin/${SVCBIN}; \
++		install -c -s ${SVCBIN} ${DESTDIR}/sbin/${SVCBIN}; \
+ 	fi;
+-	@echo "Installing ${BIN} in ${DESTDIR}/usr/bin"
+-	@mkdir -p ${DESTDIR}/usr/bin
+-	install -c -s ${BIN} ${DESTDIR}/usr/bin/${BIN}
++	@echo "Installing ${BIN} in ${DESTDIR}/bin"
++	@mkdir -p ${DESTDIR}/bin
++	install -c -s ${BIN} ${DESTDIR}/bin/${BIN}
+ 
+ ${SVCBIN}: rstat_proc.o rstat_svc.o rstat_xdr.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rstat_proc.o rstat_svc.o rstat_xdr.o $(LIB)
+diff -ur newgcc/secure_rpc/bin/Makefile destdir/secure_rpc/bin/Makefile
+--- newgcc/secure_rpc/bin/Makefile	2009-11-23 15:01:04.802407500 +0100
++++ destdir/secure_rpc/bin/Makefile	2009-11-23 15:03:40.569029400 +0100
+@@ -20,7 +20,7 @@
+ 
+ install:
+ 	-for i in ${NSTD}; do \
+-		(install -s $$i ${DESTDIR}/usr/bin/$$i); done
++		(install -s $$i ${DESTDIR}/bin/$$i); done
+ 
+ clean:
+ 	rm -f a.out core *.s *.o
+diff -ur newgcc/secure_rpc/keyserv/Makefile destdir/secure_rpc/keyserv/Makefile
+--- newgcc/secure_rpc/keyserv/Makefile	2009-11-23 15:01:04.802407500 +0100
++++ destdir/secure_rpc/keyserv/Makefile	2009-11-23 15:03:40.740905500 +0100
+@@ -23,8 +23,8 @@
+ 	rm -f $(ALL) $(KEYSERV_OBJS) $(KEYENVOY_OBJS)
+ 
+ install: $(ALL)
+-	install -s -m  755 keyserv  $(DESTDIR)/usr/etc
+-	install -s -m 4755 keyenvoy $(DESTDIR)/usr/etc
++	install -s -m  755 keyserv  $(DESTDIR)/etc
++	install -s -m 4755 keyenvoy $(DESTDIR)/etc
+ 
+ depend:
+ 	rm -f makedep
+diff -ur newgcc/secure_rpc/rpc/Makefile destdir/secure_rpc/rpc/Makefile
+--- newgcc/secure_rpc/rpc/Makefile	2009-11-23 15:01:04.818032600 +0100
++++ destdir/secure_rpc/rpc/Makefile	2009-11-23 15:03:40.787780800 +0100
+@@ -45,15 +45,15 @@
+ 
+ install: $(HDRS) librpclib.a
+ 	@echo "Creating RPC header directory"
+-	-mkdir ${DESTDIR}/usr/include/rpc && \
+-		chown bin ${DESTDIR}/usr/include/rpc && \
+-		chmod 755 ${DESTDIR}/usr/include/rpc
++	-mkdir ${DESTDIR}/include/rpc && \
++		chown bin ${DESTDIR}/include/rpc && \
++		chmod 755 ${DESTDIR}/include/rpc
+ 	@echo "Installing RPC header files"
+ 	-set -x;for i in $(HDRS) $(XFILES) ; do \
+-		(install -c -m 644 $$i ${DESTDIR}/usr/include/rpc) done
++		(install -c -m 644 $$i ${DESTDIR}/include/rpc) done
+ 	@echo "Installing RPC library"
+-	install -c -m 644 librpclib.a ${DESTDIR}/usr/lib
+-	ranlib ${DESTDIR}/usr/lib/librpclib.a
++	install -c -m 644 librpclib.a ${DESTDIR}/lib
++	ranlib ${DESTDIR}/lib/librpclib.a
+ 
+ tags: $(SRCS) $(HDRS)
+ 	ctags -tw $(SRCS) $(HDRS)
+@@ -91,7 +91,7 @@
+               (/bin/grep '^#[         ]*include' x.c $$i | sed \
+                       -e '/\.\.\/h/d' \
+                       -e '/\.\.\/ufs/d' \
+-                      -e 's,<\(.*\)>,"/usr/include/\1",' \
++                      -e 's,<\(.*\)>,"/include/\1",' \
+                       -e 's/:[^"]*"\([^"]*\)".*/: \1/' \
+ 	                  -e 's/\.c/\.o/' >>makedep); done
+ 	echo '/^# DO NOT DELETE THIS LINE/+2,$$d' >eddep

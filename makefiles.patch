@@ -1,0 +1,72 @@
+diff -Nur rpcsvc/etc/Makefile makefiles/etc/Makefile
+--- rpcsvc/etc/Makefile	2009-11-23 16:32:35.115928600 +0100
++++ makefiles/etc/Makefile	2009-11-23 16:06:27.334678600 +0100
+@@ -4,7 +4,7 @@
+ #   Files and programs for /etc.  rpclib must have already been installed.
+ #
+ DESTDIR=
+-CFLAGS= -I/usr/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
++CFLAGS= -I/lib/gcc/i686-pc-cygwin/4.3.2/include/ -g -O2
+ LIB = -lrpclib -lnetapi32
+ LDFLAGS= $(LIB)
+ BIN = portmap rpcinfo
+diff -Nur rpcsvc/man/Makefile makefiles/man/Makefile
+--- rpcsvc/man/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ makefiles/man/Makefile	2009-11-23 16:11:30.694053600 +0100
+@@ -0,0 +1,12 @@
++#
++# @(#)Makefile	2.1 88/08/11 4.0 RPCSRC
++#
++#   Build and install everything.
++#
++# These directories are presumed to exist in DESTDIR:
++#    /lib /bin /include
++#
++
++
++all install: 
++	 echo "making man"
+diff -Nur rpcsvc/rpc/Makefile makefiles/rpc/Makefile
+--- rpcsvc/rpc/Makefile	2009-11-23 16:57:14.022178600 +0100
++++ makefiles/rpc/Makefile	2009-11-23 16:59:50.490928600 +0100
+@@ -49,6 +49,7 @@
+ 	@echo "Installing RPC library"
+ 	@if [ -f ${DESTDIR}/lib/librpclib.a ]; then rm -f ${DESTDIR}/lib/librpclib.a; fi;
+ 	@if [ ! -e  ${DESTDIR}/lib ];then mkdir -p ${DESTDIR}/lib;fi
++	@if [ ! -e  ${DESTDIR}/bin ];then mkdir -p ${DESTDIR}/bin;fi
+ 	install -c -m 644 librpclib.a ${DESTDIR}/lib
+ 	ranlib ${DESTDIR}/lib/librpclib.a
+ 	@if [ -e ${DESTDIR}/lib/librpc.a ];   then rm -f ${DESTDIR}/lib/librpc.a  ; fi;
+diff -Nur rpcsvc/rpcgen/Makefile makefiles/rpcgen/Makefile
+--- rpcsvc/rpcgen/Makefile	2009-11-23 15:36:29.600303600 +0100
++++ makefiles/rpcgen/Makefile	2009-11-23 16:29:05.444053600 +0100
+@@ -20,7 +20,7 @@
+ 
+ install: $(GOAL)
+ 	@echo "Installing the RPC Protocol Compiler"
+-	@mkdir -p $(DESTDIR)/bin
++	@if [ ! -e $(DESTDIR)/bin ];then mkdir -p $(DESTDIR)/bin;fi;
+ 	install -s $(GOAL) $(DESTDIR)/bin
+ 
+ lint: $(SRCS) $(HDRS)
+diff -Nur rpcsvc/rpcsvc/Makefile makefiles/rpcsvc/Makefile
+--- rpcsvc/rpcsvc/Makefile	2009-11-23 16:05:44.256553600 +0100
++++ makefiles/rpcsvc/Makefile	2009-11-23 16:39:48.694053600 +0100
+@@ -13,7 +13,7 @@
+       rquota.h rstat.h sm_inter.h spray.h yppasswd.h yp.h
+ XFILES= bootparam_prot.x klm_prot.x mount.x nfs_prot.x nlm_prot.x \
+       rex.x rnusers.x rquota.x rstat.x sm_inter.x spray.x yppasswd.x yp.x
+-BIN= rstat
++BIN= rstat${EXT}
+ SVCBIN= rstat_svc
+ GEN= rstat_clnt.c rstat_svc.c rstat_xdr.c
+ 
+@@ -34,7 +34,7 @@
+ #		(install -c -s $$i ${DESTDIR}/etc/$$i); done
+ 	@echo "Installing ${BIN} in ${DESTDIR}/bin"
+ 	@set -x;for i in ${BIN}; do \
+-		(install -c -s $$i ${DESTDIR}/bin/$$i); done
++		(install -c -s $${i}.exe ${DESTDIR}/bin/$${i}.exe); done
+ 
+ rstat_svc: rstat_proc.o rstat_svc.o rstat_xdr.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rstat_proc.o rstat_svc.o rstat_xdr.o $(LIB)
