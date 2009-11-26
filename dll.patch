@@ -1,12 +1,12 @@
-diff -ur destdir/rpc/Makefile dll/rpc/Makefile
---- destdir/rpc/Makefile	2009-11-23 15:03:40.412778400 +0100
-+++ dll/rpc/Makefile	2009-11-23 16:47:44.006553600 +0100
-@@ -30,11 +30,14 @@
+diff -ur a/rpc/Makefile dll/rpc/Makefile
+--- a/rpc/Makefile	2009-11-26 12:26:55.390625000 +0100
++++ dll/rpc/Makefile	2009-11-26 12:31:27.593750000 +0100
+@@ -30,11 +30,17 @@
  HDRS = auth.h auth_unix.h clnt.h netdb.h pmap_clnt.h \
  	pmap_prot.h pmap_rmt.h rpc.h rpc_msg.h svc.h svc_auth.h types.h xdr.h
  
 -all rpclib:	librpclib.a
-+all rpclib:	librpclib.a librpc.dll
++all rpclib:	librpclib.a librpc.dll cygrpc.dll
  
  librpclib.a: ${OBJS}
  	@echo "building librpclib.a"
@@ -14,10 +14,13 @@ diff -ur destdir/rpc/Makefile dll/rpc/Makefile
 +librpc.dll: ${OBJS}
 +	   @echo "building $@"
 +	   gcc -shared -o $@ $^
++cygrpc.dll: ${OBJS}
++	   @echo "building $@"
++	   gcc -shared -o $@ $^
  
  install: $(HDRS) librpclib.a
  	@echo "Creating RPC header directory"
-@@ -45,11 +48,15 @@
+@@ -45,11 +51,19 @@
  		(install -c -m 644 $$i ${DESTDIR}/include/rpc) done
  	@echo "Installing RPC library"
  	@if [ -f ${DESTDIR}/lib/librpclib.a ]; then rm -f ${DESTDIR}/lib/librpclib.a; fi;
@@ -30,9 +33,13 @@ diff -ur destdir/rpc/Makefile dll/rpc/Makefile
 +	@if [ -e ${DESTDIR}/lib/librpc.a ];   then rm -f ${DESTDIR}/lib/librpc.a  ; fi;
 +	@if [ -e ${DESTDIR}/lib/librpc.dll ]; then rm -f ${DESTDIR}/lib/librpc.dll; fi;
 +	@if [ -e ${DESTDIR}/bin/librpc.dll ]; then rm -f ${DESTDIR}/bin/librpc.dll; fi;
-+	ln -fs ${DESTDIR}/lib/librpclib.a ${DESTDIR}/lib/librpc.a    
++	@if [ -e ${DESTDIR}/lib/cygrpc.dll ]; then rm -f ${DESTDIR}/lib/cygrpc.dll; fi;
++	@if [ -e ${DESTDIR}/bin/cygrpc.dll ]; then rm -f ${DESTDIR}/bin/cygrpc.dll; fi;
++	ln -fs ${DESTDIR}/lib/librpclib.a ${DESTDIR}/lib/librpc.a	
 +	install -c -m 644 librpc.dll ${DESTDIR}/lib/librpc.dll
 +	install -c -m 644 librpc.dll ${DESTDIR}/bin/librpc.dll
++	install -c -m 644 cygrpc.dll ${DESTDIR}/lib/cygrpc.dll
++	install -c -m 644 cygrpc.dll ${DESTDIR}/bin/cygrpc.dll
  
  tags: $(SRCS) $(HDRS)
  	ctags -tw $(SRCS) $(HDRS)
